@@ -55,5 +55,8 @@ class DatabaseSeeder extends Seeder
                 'is_active'    => true,
             ]);
         }
+
+        // テストデータが必要な場合は以下を呼び出す
+        // $this->call(TestDataSeeder::class);
     }
 }
