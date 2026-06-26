@@ -1,74 +1,102 @@
+/**
+ * ハッシュベースカスタムルーター
+ *
+ * vue-router を使わず、window.location.hash と Vue の reactive() だけで
+ * クライアントサイドルーティングを実装している。
+ *
+ * 特徴:
+ *  - ページコンポーネントは markRaw() でラップ（不要なリアクティブ変換を防止）
+ *  - 動的セグメント (:id, :code) に対応
+ *  - クエリパラメータ (?from=...&to=...) の解析に対応
+ *  - auth: false のルートは未認証でアクセス可能
+ */
 import { ref, computed, markRaw } from 'vue'
 
-// ページコンポーネント（遅延インポートで必要なときだけ読み込む）
-import LoginPage from '../pages/Login.vue'
-import DashboardPage from '../pages/Dashboard.vue'
-import ClientsIndex from '../pages/clients/Index.vue'
-import ClientsForm from '../pages/clients/Form.vue'
-import SalesIndex from '../pages/sales/Index.vue'
-import SalesForm from '../pages/sales/Form.vue'
-import InvoicesIndex from '../pages/invoices/Index.vue'
-import InvoicesForm from '../pages/invoices/Form.vue'
-import ReceiptsIndex from '../pages/receipts/Index.vue'
-import ReceiptsForm from '../pages/receipts/Form.vue'
-import PaymentsIndex from '../pages/payments/Index.vue'
-import PaymentsForm from '../pages/payments/Form.vue'
-import JournalsIndex from '../pages/journals/Index.vue'
-import JournalsForm from '../pages/journals/Form.vue'
-import LedgerIndex from '../pages/ledger/Index.vue'
-import LedgerShow from '../pages/ledger/Show.vue'
-import PLIndex from '../pages/pl/Index.vue'
-import BSIndex from '../pages/bs/Index.vue'
-import ExpensesIndex from '../pages/expenses/Index.vue'
-import ExpensesForm from '../pages/expenses/Form.vue'
-import ExpensesShow from '../pages/expenses/Show.vue'
+// ── ページコンポーネントのインポート ──────────────────────────
+import LoginPage      from '../pages/Login.vue'
+import DashboardPage  from '../pages/Dashboard.vue'
+import ClientsIndex   from '../pages/clients/Index.vue'
+import ClientsForm    from '../pages/clients/Form.vue'
+import SalesIndex     from '../pages/sales/Index.vue'
+import SalesForm      from '../pages/sales/Form.vue'
+import InvoicesIndex  from '../pages/invoices/Index.vue'
+import InvoicesForm   from '../pages/invoices/Form.vue'
+import ReceiptsIndex  from '../pages/receipts/Index.vue'
+import ReceiptsForm   from '../pages/receipts/Form.vue'
+import PaymentsIndex  from '../pages/payments/Index.vue'
+import PaymentsForm   from '../pages/payments/Form.vue'
+import JournalsIndex  from '../pages/journals/Index.vue'
+import JournalsForm   from '../pages/journals/Form.vue'
+import LedgerIndex    from '../pages/ledger/Index.vue'
+import LedgerShow     from '../pages/ledger/Show.vue'
+import PLIndex        from '../pages/pl/Index.vue'
+import BSIndex        from '../pages/bs/Index.vue'
+import ExpensesIndex  from '../pages/expenses/Index.vue'
+import ExpensesForm   from '../pages/expenses/Form.vue'
+import ExpensesShow   from '../pages/expenses/Show.vue'
 
-// ルート定義
+/**
+ * ルート定義テーブル
+ * path: ハッシュパス（動的セグメントは :変数名）
+ * component: 表示するページコンポーネント（markRaw でラップ済み）
+ * auth: false の場合は未認証でもアクセス可能
+ */
 const routes = [
-  { path: '/login',                  component: markRaw(LoginPage),     auth: false },
-  { path: '/',                       component: markRaw(DashboardPage),  auth: true },
-  { path: '/dashboard',              component: markRaw(DashboardPage),  auth: true },
-  { path: '/clients',                component: markRaw(ClientsIndex),   auth: true },
-  { path: '/clients/create',         component: markRaw(ClientsForm),    auth: true },
-  { path: '/clients/:id/edit',       component: markRaw(ClientsForm),    auth: true },
-  { path: '/sales',                  component: markRaw(SalesIndex),     auth: true },
-  { path: '/sales/create',           component: markRaw(SalesForm),      auth: true },
-  { path: '/sales/:id/edit',         component: markRaw(SalesForm),      auth: true },
-  { path: '/invoices',               component: markRaw(InvoicesIndex),  auth: true },
-  { path: '/invoices/create',        component: markRaw(InvoicesForm),   auth: true },
-  { path: '/invoices/:id/edit',      component: markRaw(InvoicesForm),   auth: true },
-  { path: '/receipts',               component: markRaw(ReceiptsIndex),  auth: true },
-  { path: '/receipts/create',        component: markRaw(ReceiptsForm),   auth: true },
-  { path: '/receipts/:id/edit',      component: markRaw(ReceiptsForm),   auth: true },
-  { path: '/payments',               component: markRaw(PaymentsIndex),  auth: true },
-  { path: '/payments/create',        component: markRaw(PaymentsForm),   auth: true },
-  { path: '/payments/:id/edit',      component: markRaw(PaymentsForm),   auth: true },
-  { path: '/journals',               component: markRaw(JournalsIndex),  auth: true },
-  { path: '/journals/create',        component: markRaw(JournalsForm),   auth: true },
-  { path: '/journals/:id/edit',      component: markRaw(JournalsForm),   auth: true },
-  { path: '/ledger',                 component: markRaw(LedgerIndex),    auth: true },
-  { path: '/ledger/:code',           component: markRaw(LedgerShow),     auth: true },
-  { path: '/profit-loss',            component: markRaw(PLIndex),        auth: true },
-  { path: '/balance-sheet',          component: markRaw(BSIndex),        auth: true },
-  { path: '/expenses',               component: markRaw(ExpensesIndex),  auth: true },
-  { path: '/expenses/create',        component: markRaw(ExpensesForm),   auth: true },
-  { path: '/expenses/:id',           component: markRaw(ExpensesShow),   auth: true },
-  { path: '/expenses/:id/edit',      component: markRaw(ExpensesForm),   auth: true },
+  { path: '/login',             component: markRaw(LoginPage),    auth: false },
+  { path: '/',                  component: markRaw(DashboardPage), auth: true },
+  { path: '/dashboard',         component: markRaw(DashboardPage), auth: true },
+  { path: '/clients',           component: markRaw(ClientsIndex),  auth: true },
+  { path: '/clients/create',    component: markRaw(ClientsForm),   auth: true },
+  { path: '/clients/:id/edit',  component: markRaw(ClientsForm),   auth: true },
+  { path: '/sales',             component: markRaw(SalesIndex),    auth: true },
+  { path: '/sales/create',      component: markRaw(SalesForm),     auth: true },
+  { path: '/sales/:id/edit',    component: markRaw(SalesForm),     auth: true },
+  { path: '/invoices',          component: markRaw(InvoicesIndex), auth: true },
+  { path: '/invoices/create',   component: markRaw(InvoicesForm),  auth: true },
+  { path: '/invoices/:id/edit', component: markRaw(InvoicesForm),  auth: true },
+  { path: '/receipts',          component: markRaw(ReceiptsIndex), auth: true },
+  { path: '/receipts/create',   component: markRaw(ReceiptsForm),  auth: true },
+  { path: '/receipts/:id/edit', component: markRaw(ReceiptsForm),  auth: true },
+  { path: '/payments',          component: markRaw(PaymentsIndex), auth: true },
+  { path: '/payments/create',   component: markRaw(PaymentsForm),  auth: true },
+  { path: '/payments/:id/edit', component: markRaw(PaymentsForm),  auth: true },
+  { path: '/journals',          component: markRaw(JournalsIndex), auth: true },
+  { path: '/journals/create',   component: markRaw(JournalsForm),  auth: true },
+  { path: '/journals/:id/edit', component: markRaw(JournalsForm),  auth: true },
+  { path: '/ledger',            component: markRaw(LedgerIndex),   auth: true },
+  { path: '/ledger/:code',      component: markRaw(LedgerShow),    auth: true },
+  { path: '/profit-loss',       component: markRaw(PLIndex),       auth: true },
+  { path: '/balance-sheet',     component: markRaw(BSIndex),       auth: true },
+  { path: '/expenses',          component: markRaw(ExpensesIndex), auth: true },
+  { path: '/expenses/create',   component: markRaw(ExpensesForm),  auth: true },
+  { path: '/expenses/:id',      component: markRaw(ExpensesShow),  auth: true },
+  { path: '/expenses/:id/edit', component: markRaw(ExpensesForm),  auth: true },
 ]
 
-// 現在のハッシュパスを追跡
+/** 現在のハッシュパス（リアクティブ）。hashchange イベントで自動更新される */
 const currentHash = ref(getPath())
 
+/** window.location.hash からパスを取得するユーティリティ */
 function getPath() {
   return window.location.hash.slice(1) || '/'
 }
 
+// hashchange イベントを監視してリアクティブ値を同期
 window.addEventListener('hashchange', () => {
   currentHash.value = getPath()
 })
 
-// パスマッチング（動的セグメント対応）
+/**
+ * パスマッチング
+ *
+ * 動的セグメント（:id など）を含むルートに対しても正確にマッチし、
+ * パラメータ・クエリパラメータを抽出して返す。
+ *
+ * @param  {string}  path  - 現在のハッシュパス（クエリ付き可）
+ * @returns {{ route, params, query } | null}
+ */
 function matchRoute(path) {
+  // クエリ文字列を分離
   const [cleanPath, queryStr] = path.split('?')
   const query = {}
   if (queryStr) {
@@ -77,13 +105,14 @@ function matchRoute(path) {
 
   for (const route of routes) {
     const routeParts = route.path.split('/')
-    const pathParts = cleanPath.split('/')
+    const pathParts  = cleanPath.split('/')
     if (routeParts.length !== pathParts.length) continue
 
     const params = {}
     let match = true
     for (let i = 0; i < routeParts.length; i++) {
       if (routeParts[i].startsWith(':')) {
+        // 動的セグメント: パラメータとして抽出（例: :id → params.id = '5'）
         params[routeParts[i].slice(1)] = pathParts[i]
       } else if (routeParts[i] !== pathParts[i]) {
         match = false; break
@@ -91,27 +120,44 @@ function matchRoute(path) {
     }
     if (match) return { route, params, query }
   }
-  return null
+  return null // マッチするルートなし
 }
 
+/**
+ * router オブジェクト
+ *
+ * App.vue からインポートして使用する。
+ * match は computed で現在のハッシュに応じて自動更新される。
+ */
 export const router = {
   currentHash,
-  push(path) {
-    window.location.hash = path
-  },
-  replace(path) {
-    window.location.replace('#' + path)
-  },
-  back() {
-    history.back()
-  },
+
+  /** プッシュナビゲーション（ブラウザ履歴に追加） */
+  push(path) { window.location.hash = path },
+
+  /** リプレースナビゲーション（履歴を置き換え） */
+  replace(path) { window.location.replace('#' + path) },
+
+  /** ブラウザの「戻る」 */
+  back() { history.back() },
+
+  /** 現在のルートマッチ結果（computed） */
   match: computed(() => matchRoute(currentHash.value)),
 }
 
+/**
+ * useRoute コンポーザブル
+ *
+ * 各ページコンポーネントで現在のルートパラメータ・クエリを取得するために使う。
+ *
+ * @example
+ *  const { params, query } = useRoute()
+ *  const id = params.value.id  // URL の :id 部分
+ */
 export function useRoute() {
   return {
     params: computed(() => router.match.value?.params ?? {}),
-    query:  computed(() => router.match.value?.query ?? {}),
+    query:  computed(() => router.match.value?.query  ?? {}),
     path:   currentHash,
   }
 }
