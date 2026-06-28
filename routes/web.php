@@ -67,3 +67,27 @@ Route::middleware('auth')->prefix('api')->group(function () {
 
 // SPA フォールバック（全ての未マッチルートをSPAに渡す）
 Route::get('/{any}', fn() => view('app'))->where('any', '.*');
+
+// ── 追加5機能ルート（機能11〜15）────────────────────────────
+Route::middleware('auth')->prefix('api')->group(function () {
+    // 11. 予算管理
+    Route::apiResource('budgets', \App\Http\Controllers\Api\BudgetController::class);
+    Route::get('budgets-comparison', [\App\Http\Controllers\Api\BudgetController::class, 'comparison']);
+
+    // 12. 固定資産管理
+    Route::apiResource('fixed-assets', \App\Http\Controllers\Api\FixedAssetController::class);
+    Route::get('fixed-assets/{fixedAsset}/depreciation', [\App\Http\Controllers\Api\FixedAssetController::class, 'depreciation']);
+
+    // 13. 部門管理
+    Route::apiResource('departments', \App\Http\Controllers\Api\DepartmentController::class);
+    Route::get('department-report', [\App\Http\Controllers\Api\DepartmentController::class, 'report']);
+
+    // 14. 消費税管理
+    Route::get('tax',         [\App\Http\Controllers\Api\TaxController::class, 'index']);
+    Route::get('tax-summary', [\App\Http\Controllers\Api\TaxController::class, 'summary']);
+
+    // 15. 帳票出力
+    Route::get('documents/invoice/{invoice}', [\App\Http\Controllers\Api\DocumentController::class, 'invoice']);
+    Route::get('documents/receipt/{receipt}', [\App\Http\Controllers\Api\DocumentController::class, 'receipt']);
+    Route::get('documents/payment/{payment}', [\App\Http\Controllers\Api\DocumentController::class, 'payment']);
+});

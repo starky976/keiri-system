@@ -34,6 +34,15 @@ import BSIndex        from '../pages/bs/Index.vue'
 import ExpensesIndex  from '../pages/expenses/Index.vue'
 import ExpensesForm   from '../pages/expenses/Form.vue'
 import ExpensesShow   from '../pages/expenses/Show.vue'
+// ── 追加5機能（機能11〜15）────────────────────────────────────
+import BudgetsIndex   from '../pages/budgets/Index.vue'
+import BudgetsForm    from '../pages/budgets/Form.vue'
+import AssetsIndex    from '../pages/assets/Index.vue'
+import AssetsForm     from '../pages/assets/Form.vue'
+import AssetsShow     from '../pages/assets/Show.vue'
+import DepartmentsIndex from '../pages/departments/Index.vue'
+import TaxIndex       from '../pages/tax/Index.vue'
+import DocumentsIndex from '../pages/documents/Index.vue'
 
 /**
  * ルート定義テーブル
@@ -71,6 +80,16 @@ const routes = [
   { path: '/expenses/create',   component: markRaw(ExpensesForm),  auth: true },
   { path: '/expenses/:id',      component: markRaw(ExpensesShow),  auth: true },
   { path: '/expenses/:id/edit', component: markRaw(ExpensesForm),  auth: true },
+  // ── 追加5機能 ──────────────────────────────────────────────
+  { path: '/budgets',             component: markRaw(BudgetsIndex),     auth: true },
+  { path: '/budgets/create',      component: markRaw(BudgetsForm),      auth: true },
+  { path: '/assets',              component: markRaw(AssetsIndex),      auth: true },
+  { path: '/assets/create',       component: markRaw(AssetsForm),       auth: true },
+  { path: '/assets/:id',          component: markRaw(AssetsShow),       auth: true },
+  { path: '/assets/:id/edit',     component: markRaw(AssetsForm),       auth: true },
+  { path: '/departments',         component: markRaw(DepartmentsIndex), auth: true },
+  { path: '/tax',                 component: markRaw(TaxIndex),         auth: true },
+  { path: '/documents',           component: markRaw(DocumentsIndex),   auth: true },
 ]
 
 /** 現在のハッシュパス（リアクティブ）。hashchange イベントで自動更新される */

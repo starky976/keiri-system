@@ -52,6 +52,12 @@
         <NavItem href="#/ledger"        icon="📚">総勘定元帳</NavItem>
         <NavItem href="#/profit-loss"   icon="📈">損益計算書</NavItem>
         <NavItem href="#/balance-sheet" icon="⚖️">貸借対照表</NavItem>
+        <!-- 追加5機能 -->
+        <NavItem href="#/budgets"       icon="🎯">予算管理</NavItem>
+        <NavItem href="#/assets"        icon="🏗️">固定資産</NavItem>
+        <NavItem href="#/departments"   icon="🏬">部門管理</NavItem>
+        <NavItem href="#/tax"           icon="🧮">消費税管理</NavItem>
+        <NavItem href="#/documents"     icon="🖨️">帳票出力</NavItem>
       </nav>
 
       <!-- ユーザー情報・ログアウト -->
