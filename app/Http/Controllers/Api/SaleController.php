@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\DB;
  */
 class SaleController extends Controller
 {
+    use \App\Http\Controllers\Api\Concerns\EscapesLikeQuery;
+
     /**
      * 売上一覧（ページネーション）
      *
@@ -32,9 +34,9 @@ class SaleController extends Controller
         // キーワード検索: sale_number・description・取引先名に部分一致
         if ($request->filled('search')) {
             $q->where(fn($q) => $q
-                ->where('sale_number', 'like', "%{$request->search}%")
-                ->orWhere('description', 'like', "%{$request->search}%")
-                ->orWhereHas('client', fn($q) => $q->where('name', 'like', "%{$request->search}%"))
+                ->where('sale_number', 'like', '%' . $this->escapeLike($request->search) . '%')
+                ->orWhere('description', 'like', '%' . $this->escapeLike($request->search) . '%')
+                ->orWhereHas('client', fn($q) => $q->where('name', 'like', '%' . $this->escapeLike($request->search) . '%'))
             );
         }
 

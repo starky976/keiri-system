@@ -14,12 +14,14 @@ use Illuminate\Http\Request;
 
 class FixedAssetController extends Controller
 {
+    use \App\Http\Controllers\Api\Concerns\EscapesLikeQuery;
+
     public function index(Request $request): JsonResponse
     {
         $q = FixedAsset::query()
             ->when($request->category, fn($q, $v) => $q->where('category', $v))
             ->when($request->search,   fn($q, $v) => $q->where(fn($q) =>
-                $q->where('name', 'like', "%$v%")->orWhere('asset_number', 'like', "%$v%")))
+                $q->where('name', 'like', '%' . $this->escapeLike($v) . '%')->orWhere('asset_number', 'like', '%' . $this->escapeLike($v) . '%')))
             ->when($request->active === '1', fn($q) => $q->whereNull('disposal_date'))
             ->orderByDesc('acquisition_date');
 

@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\DB;
  */
 class ExpenseController extends Controller
 {
+    use \App\Http\Controllers\Api\Concerns\EscapesLikeQuery;
+
     /**
      * 経費一覧
      *
@@ -35,7 +37,7 @@ class ExpenseController extends Controller
 
         // キーワード検索: タイトル
         if ($request->filled('search')) {
-            $q->where('title', 'like', "%{$request->search}%");
+            $q->where('title', 'like', '%' . $this->escapeLike($request->search) . '%');
         }
 
         if ($request->filled('status')) $q->where('status', $request->status);

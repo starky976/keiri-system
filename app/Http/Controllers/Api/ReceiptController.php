@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\DB;
  */
 class ReceiptController extends Controller
 {
+    use \App\Http\Controllers\Api\Concerns\EscapesLikeQuery;
+
     /**
      * 入金一覧
      *
@@ -33,8 +35,8 @@ class ReceiptController extends Controller
         // キーワード検索: receipt_number または取引先名
         if ($request->filled('search')) {
             $q->where(fn($q) => $q
-                ->where('receipt_number', 'like', "%{$request->search}%")
-                ->orWhereHas('client', fn($q) => $q->where('name', 'like', "%{$request->search}%"))
+                ->where('receipt_number', 'like', '%' . $this->escapeLike($request->search) . '%')
+                ->orWhereHas('client', fn($q) => $q->where('name', 'like', '%' . $this->escapeLike($request->search) . '%'))
             );
         }
 

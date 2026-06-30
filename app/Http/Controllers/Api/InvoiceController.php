@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\DB;
  */
 class InvoiceController extends Controller
 {
+    use \App\Http\Controllers\Api\Concerns\EscapesLikeQuery;
+
     /**
      * 請求書一覧
      *
@@ -31,8 +33,8 @@ class InvoiceController extends Controller
         // キーワード検索: invoice_number または取引先名
         if ($request->filled('search')) {
             $q->where(fn($q) => $q
-                ->where('invoice_number', 'like', "%{$request->search}%")
-                ->orWhereHas('client', fn($q) => $q->where('name', 'like', "%{$request->search}%"))
+                ->where('invoice_number', 'like', '%' . $this->escapeLike($request->search) . '%')
+                ->orWhereHas('client', fn($q) => $q->where('name', 'like', '%' . $this->escapeLike($request->search) . '%'))
             );
         }
 

@@ -16,6 +16,8 @@ use Illuminate\Http\Request;
  */
 class ClientController extends Controller
 {
+    use \App\Http\Controllers\Api\Concerns\EscapesLikeQuery;
+
     /**
      * 取引先一覧（ページネーション）
      *
@@ -29,8 +31,8 @@ class ClientController extends Controller
         // キーワード検索: name または code に部分一致
         if ($request->filled('search')) {
             $query->where(fn($q) => $q
-                ->where('name', 'like', "%{$request->search}%")
-                ->orWhere('code', 'like', "%{$request->search}%")
+                ->where('name', 'like', '%' . $this->escapeLike($request->search) . '%')
+                ->orWhere('code', 'like', '%' . $this->escapeLike($request->search) . '%')
             );
         }
 

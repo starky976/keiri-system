@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\DB;
  */
 class JournalController extends Controller
 {
+    use \App\Http\Controllers\Api\Concerns\EscapesLikeQuery;
+
     /**
      * 仕訳一覧
      *
@@ -36,8 +38,8 @@ class JournalController extends Controller
         // キーワード検索: 番号・摘要
         if ($request->filled('search')) {
             $q->where(fn($q) => $q
-                ->where('journal_number', 'like', "%{$request->search}%")
-                ->orWhere('description', 'like', "%{$request->search}%")
+                ->where('journal_number', 'like', '%' . $this->escapeLike($request->search) . '%')
+                ->orWhere('description', 'like', '%' . $this->escapeLike($request->search) . '%')
             );
         }
 

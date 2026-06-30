@@ -17,6 +17,8 @@ use Illuminate\Http\Request;
  */
 class PaymentController extends Controller
 {
+    use \App\Http\Controllers\Api\Concerns\EscapesLikeQuery;
+
     /**
      * 支払一覧
      *
@@ -30,9 +32,9 @@ class PaymentController extends Controller
         // キーワード検索: payment_number・description・取引先名
         if ($request->filled('search')) {
             $q->where(fn($q) => $q
-                ->where('payment_number', 'like', "%{$request->search}%")
-                ->orWhere('description', 'like', "%{$request->search}%")
-                ->orWhereHas('client', fn($q) => $q->where('name', 'like', "%{$request->search}%"))
+                ->where('payment_number', 'like', '%' . $this->escapeLike($request->search) . '%')
+                ->orWhere('description', 'like', '%' . $this->escapeLike($request->search) . '%')
+                ->orWhereHas('client', fn($q) => $q->where('name', 'like', '%' . $this->escapeLike($request->search) . '%'))
             );
         }
 
