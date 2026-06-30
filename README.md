@@ -107,3 +107,4 @@ keiri-system/
 
 - `tailwind.config.js` は v3 用のファイルが残っていますが v4 では使用されません（削除可）。
 - `postcss.config.js` は空のままにしてください（`tailwindcss: {}` を追加すると v3 との競合が発生します）。
+# keiri-system
