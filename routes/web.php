@@ -18,7 +18,8 @@ use App\Http\Controllers\Api\ExpenseController;
 Route::get('/login', fn() => view('app'))->name('login');
 
 // 認証API
-Route::post('/api/login', [AuthController::class, 'login']);
+// throttle:5,1 = 1分間に5回を超えるリクエストを 429 Too Many Requests で拒否（ブルートフォース対策）
+Route::post('/api/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::post('/api/logout', [AuthController::class, 'logout'])->middleware('auth');
 Route::get('/api/user', [AuthController::class, 'user'])->middleware('auth');
 
