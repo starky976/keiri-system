@@ -31,6 +31,11 @@
       </div>
       <a href="#/sales/create" class="btn-primary">+ 売上登録</a>
     </div>
+    <!-- エラー表示 -->
+    <div v-if="error" class="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+      ⚠ {{ error }}
+    </div>
+
 
     <!-- 売上テーブル -->
     <div class="bg-white rounded-lg border shadow-sm overflow-hidden">
@@ -43,7 +48,8 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr v-if="!rows.length"><td colspan="7" class="td text-center text-gray-400">データがありません</td></tr>
+                    <LoadingSpinner v-if="loading" :colspan="7" />
+          <tr v-else-if="!rows.length"><td colspan="7" class="td text-center text-gray-400">データがありません</td></tr>
           <tr v-for="s in rows" :key="s.id" class="hover:bg-gray-50">
             <td class="td font-mono text-xs">
               <a :href="`#/sales/${s.id}/edit`" class="text-blue-600 hover:underline">{{ s.sale_number }}</a>
@@ -70,10 +76,14 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import LoadingSpinner from '../../components/LoadingSpinner.vue'
+import { useAsync }    from '../../composables/useAsync.js'
 import StatusBadge from '../../components/StatusBadge.vue'
 import Pagination  from '../../components/Pagination.vue'
 import api         from '../../api/index.js'
 import { useFlash } from '../../store/flash.js'
+
+const { loading, error, execute } = useAsync()
 
 const rows       = ref([])  // テーブル表示データ
 const pagination = ref({})  // ページネーション情報
@@ -85,11 +95,13 @@ const flash      = useFlash()
 
 /** 売上一覧を取得する */
 async function load(p = 1) {
-  const res = await api.get('/sales', {
+  await execute(async () => {
+    const res = await api.get('/sales', {
     params: { search: q.value, status: status.value, from: from.value, to: to.value, page: p },
+    })
+    rows.value       = res.data.data
+    pagination.value = res.data
   })
-  rows.value       = res.data.data
-  pagination.value = res.data
 }
 
 /** 売上を論理削除する */

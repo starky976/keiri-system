@@ -5,6 +5,11 @@
 -->
 <template>
   <div>
+
+    <!-- エラー表示 -->
+    <div v-if="error" class="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+      ⚠ {{ error }}
+    </div>
     <h1 class="page-title mb-6">帳票出力</h1>
 
     <!-- 帳票種別選択 -->
@@ -88,11 +93,14 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import LoadingSpinner from '../../components/LoadingSpinner.vue'
+import { useAsync }    from '../../composables/useAsync.js'
 import api from '../../api/index.js'
+
+const { loading, error, execute } = useAsync()
 
 const type    = ref('invoice')
 const docId   = ref('')
-const loading = ref(false)
 const preview = ref(null)
 
 const types    = [
@@ -104,11 +112,10 @@ const typeLabel = computed(() => types.find(t => t.key === type.value)?.label ??
 const fmt = (v) => Number(v || 0).toLocaleString('ja-JP', { style: 'currency', currency: 'JPY' })
 
 async function loadPreview() {
-  loading.value = true
-  try {
+  await execute(async () => {
     const r = await api.get(`/documents/${type.value}/${docId.value}`)
     preview.value = r.data
-  } finally { loading.value = false }
+  })
 }
 
 function print() {

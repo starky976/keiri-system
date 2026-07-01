@@ -1,6 +1,11 @@
 <!-- 固定資産 一覧ページ -->
 <template>
   <div>
+
+    <!-- エラー表示 -->
+    <div v-if="error" class="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+      ⚠ {{ error }}
+    </div>
     <div class="flex items-center justify-between mb-4">
       <h1 class="page-title">固定資産管理</h1>
       <button @click="router.push('/assets/create')" class="btn-primary">＋ 資産登録</button>
@@ -22,7 +27,7 @@
         <th class="th text-right">帳簿価額</th><th class="th">状態</th><th class="th"></th>
       </tr></thead>
       <tbody>
-        <tr v-if="loading"><td colspan="8" class="td text-center text-gray-400">読み込み中...</td></tr>
+        <LoadingSpinner v-if="loading" :colspan="7" />
         <tr v-else-if="!rows.length"><td colspan="8" class="td text-center text-gray-400">データがありません</td></tr>
         <tr v-for="a in rows" :key="a.id" class="hover:bg-gray-50">
           <td class="td font-mono text-sm">{{ a.asset_number }}</td>
@@ -48,6 +53,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import LoadingSpinner from '../../components/LoadingSpinner.vue'
+import { useAsync }    from '../../composables/useAsync.js'
 import api from '../../api/index.js'
 import { router } from '../../router/index.js'
 import Pagination from '../../components/Pagination.vue'
@@ -55,7 +62,8 @@ import Pagination from '../../components/Pagination.vue'
 const q          = ref('')
 const category   = ref('')
 const activeOnly = ref(false)
-const loading    = ref(false)
+const { loading, error, execute } = useAsync()
+
 const rows       = ref([])
 const pagination = ref({})
 
@@ -75,14 +83,13 @@ const bookValue = (a) => {
 }
 
 async function load(p = 1) {
-  loading.value = true
-  try {
+  await execute(async () => {
     const r = await api.get('/fixed-assets', {
       params: { search: q.value, category: category.value, active: activeOnly.value ? 1 : 0, page: p }
     })
     rows.value       = r.data.data
     pagination.value = r.data
-  } finally { loading.value = false }
+  })
 }
 onMounted(load)
 </script>

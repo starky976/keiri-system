@@ -23,6 +23,11 @@
       </div>
       <a href="#/invoices/create" class="btn-primary">+ 請求書作成</a>
     </div>
+    <!-- エラー表示 -->
+    <div v-if="error" class="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+      ⚠ {{ error }}
+    </div>
+
 
     <!-- 請求書テーブル -->
     <div class="bg-white rounded-lg border shadow-sm overflow-hidden">
@@ -35,7 +40,8 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr v-if="!rows.length"><td colspan="8" class="td text-center text-gray-400">データがありません</td></tr>
+                    <LoadingSpinner v-if="loading" :colspan="7" />
+          <tr v-else-if="!rows.length"><td colspan="8" class="td text-center text-gray-400">データがありません</td></tr>
           <tr v-for="r in rows" :key="r.id" class="hover:bg-gray-50">
             <td class="td font-mono text-xs">
               <a :href="`#/invoices/${r.id}/edit`" class="text-blue-600 hover:underline">{{ r.invoice_number }}</a>
@@ -70,10 +76,14 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import LoadingSpinner from '../../components/LoadingSpinner.vue'
+import { useAsync }    from '../../composables/useAsync.js'
 import StatusBadge from '../../components/StatusBadge.vue'
 import Pagination  from '../../components/Pagination.vue'
 import api         from '../../api/index.js'
 import { useFlash } from '../../store/flash.js'
+
+const { loading, error, execute } = useAsync()
 
 const rows       = ref([])
 const pagination = ref({})
@@ -82,9 +92,11 @@ const status     = ref('')
 const flash      = useFlash()
 
 async function load(p = 1) {
-  const res = await api.get('/invoices', { params: { search: q.value, status: status.value, page: p } })
-  rows.value       = res.data.data
-  pagination.value = res.data
+  await execute(async () => {
+    const res = await api.get('/invoices', { params: { search: q.value, status: status.value, page: p } })
+    rows.value       = res.data.data
+    pagination.value = res.data
+  })
 }
 
 /** 請求書を「送付済」に変更する (/invoices/:id/send POST) */

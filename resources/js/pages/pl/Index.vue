@@ -7,6 +7,11 @@
 -->
 <template>
   <div>
+
+    <!-- エラー表示 -->
+    <div v-if="error" class="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+      ⚠ {{ error }}
+    </div>
     <!-- 期間指定フォーム -->
     <div class="bg-white rounded-lg border shadow-sm p-4 mb-6 flex gap-3 items-center">
       <label class="text-sm font-medium text-gray-700">期間</label>
@@ -81,7 +86,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import LoadingSpinner from '../../components/LoadingSpinner.vue'
+import { useAsync }    from '../../composables/useAsync.js'
 import api from '../../api/index.js'
+
+const { loading, error, execute } = useAsync()
 
 const data = ref({}) // P/L レスポンス全体
 
@@ -93,8 +102,10 @@ const to   = ref(now.toISOString().slice(0, 10))
 
 /** 損益計算書データを取得する */
 async function load() {
-  const res  = await api.get('/profit-loss', { params: { from: from.value, to: to.value } })
-  data.value = res.data
+  await execute(async () => {
+    const res  = await api.get('/profit-loss', { params: { from: from.value, to: to.value } })
+    data.value = res.data
+  })
 }
 
 function fmt(v) {

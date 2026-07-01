@@ -23,10 +23,10 @@
         @click="link.url && go(link.url)"
         class="px-3 py-1 text-sm rounded border transition"
         :class="link.active
-          ? 'bg-blue-600 text-white border-blue-600'       /* 現在ページ */
+          ? 'bg-blue-600 text-white border-blue-600'
           : link.url
-            ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 cursor-pointer' /* クリック可 */
-            : 'bg-white text-gray-300 border-gray-200 cursor-default'"                 /* 無効 */
+            ? 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 cursor-pointer'
+            : 'bg-white text-gray-300 border-gray-200 cursor-default'"
       />
     </div>
   </div>

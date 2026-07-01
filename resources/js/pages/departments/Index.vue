@@ -1,6 +1,11 @@
 <!-- 部門管理 一覧・部門別損益レポート -->
 <template>
   <div>
+
+    <!-- エラー表示 -->
+    <div v-if="error" class="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+      ⚠ {{ error }}
+    </div>
     <div class="flex items-center justify-between mb-4">
       <h1 class="page-title">部門管理</h1>
       <button @click="showForm = true" class="btn-primary">＋ 部門追加</button>
@@ -80,12 +85,16 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import LoadingSpinner from '../../components/LoadingSpinner.vue'
+import { useAsync }    from '../../composables/useAsync.js'
 import api from '../../api/index.js'
 import { useFlash } from '../../store/flash.js'
 
 const flash    = useFlash()
 const tab      = ref('list')
 const tabs     = [{ key: 'list', label: '部門一覧' }, { key: 'report', label: '部門別損益' }]
+const { loading, error, execute } = useAsync()
+
 const depts    = ref([])
 const report   = ref([])
 const showForm = ref(false)
@@ -94,8 +103,16 @@ const to       = ref(new Date().toISOString().slice(0, 10))
 const newDept  = ref({ code: '', name: '', description: '' })
 const fmt = (v) => Number(v).toLocaleString('ja-JP', { style: 'currency', currency: 'JPY' })
 
-async function loadDepts()  { depts.value  = (await api.get('/departments')).data }
-async function loadReport() { report.value = (await api.get('/department-report', { params: { from: from.value, to: to.value } })).data.departments }
+async function loadDepts() {
+  await execute(async () => {
+    depts.value = (await api.get('/departments')).data
+  })
+}
+async function loadReport() {
+  await execute(async () => {
+    report.value = (await api.get('/department-report', { params: { from: from.value, to: to.value } })).data.departments
+  })
+}
 
 async function addDept() {
   await api.post('/departments', newDept.value)

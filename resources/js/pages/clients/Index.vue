@@ -29,6 +29,11 @@
       <!-- 新規登録ボタン -->
       <a href="#/clients/create" class="btn-primary">+ 新規登録</a>
     </div>
+    <!-- エラー表示 -->
+    <div v-if="error" class="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+      ⚠ {{ error }}
+    </div>
+
 
     <!-- 取引先テーブル -->
     <div class="bg-white rounded-lg border shadow-sm overflow-hidden">
@@ -46,9 +51,7 @@
         </thead>
         <tbody class="divide-y divide-gray-100">
           <!-- 読み込み中 -->
-          <tr v-if="loading">
-            <td colspan="7" class="td text-center text-gray-400">読み込み中...</td>
-          </tr>
+          <LoadingSpinner v-if="loading" :colspan="7" />
           <!-- データなし -->
           <tr v-else-if="!rows.length">
             <td colspan="7" class="td text-center text-gray-400">データがありません</td>
@@ -88,12 +91,16 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import LoadingSpinner from '../../components/LoadingSpinner.vue'
+import { useAsync }    from '../../composables/useAsync.js'
 import StatusBadge from '../../components/StatusBadge.vue'
 import Pagination  from '../../components/Pagination.vue'
 import api         from '../../api/index.js'
 import { useFlash } from '../../store/flash.js'
 
 /** テーブルデータ */
+const { loading, error, execute } = useAsync()
+
 const rows       = ref([])
 /** ページネーション情報 */
 const pagination = ref({})
@@ -102,7 +109,6 @@ const search     = ref('')
 /** 種別フィルター（'customer' | 'vendor' | 'both' | ''） */
 const typeFilter = ref('')
 /** データ取得中フラグ */
-const loading    = ref(false)
 const flash      = useFlash()
 
 /**
@@ -110,13 +116,13 @@ const flash      = useFlash()
  * @param {number} page - 取得するページ番号
  */
 async function load(page = 1) {
-  loading.value = true
-  const res = await api.get('/clients', {
+  await execute(async () => {
+    const res = await api.get('/clients', {
     params: { search: search.value, type: typeFilter.value, page },
+    })
+    rows.value       = res.data.data
+    pagination.value = res.data
   })
-  rows.value       = res.data.data
-  pagination.value = res.data
-  loading.value    = false
 }
 
 /**

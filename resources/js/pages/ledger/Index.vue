@@ -7,6 +7,11 @@
 -->
 <template>
   <div>
+
+    <!-- エラー表示 -->
+    <div v-if="error" class="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+      ⚠ {{ error }}
+    </div>
     <div class="bg-white rounded-lg border shadow-sm overflow-hidden">
       <table class="min-w-full divide-y divide-gray-200 text-sm">
         <thead class="bg-gray-50">
@@ -17,7 +22,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr v-if="loading"><td colspan="6" class="td text-center text-gray-400">読み込み中...</td></tr>
+          <LoadingSpinner v-if="loading" :colspan="6" />
           <tr v-else-if="!rows.length"><td colspan="6" class="td text-center text-gray-400">データがありません</td></tr>
           <tr v-for="r in rows" :key="r.id" class="hover:bg-gray-50">
             <td class="td font-mono text-xs">{{ r.code }}</td>
@@ -45,15 +50,19 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import LoadingSpinner from '../../components/LoadingSpinner.vue'
+import { useAsync }    from '../../composables/useAsync.js'
 import api from '../../api/index.js'
 
-const rows    = ref([])
-const loading = ref(true)
+const { loading, error, execute } = useAsync()
+
+const rows = ref([])
 
 async function load() {
-  const res    = await api.get('/ledger')
-  rows.value   = res.data
-  loading.value = false
+  await execute(async () => {
+    const res  = await api.get('/ledger')
+    rows.value = res.data
+  })
 }
 
 function fmt(v) {

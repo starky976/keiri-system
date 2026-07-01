@@ -4,6 +4,11 @@
 -->
 <template>
   <div>
+
+    <!-- エラー表示 -->
+    <div v-if="error" class="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+      ⚠ {{ error }}
+    </div>
     <div class="flex items-center justify-between mb-4">
       <h1 class="page-title">予算管理</h1>
       <div class="flex gap-2">
@@ -37,7 +42,8 @@
           <th class="th text-right">予算額</th><th class="th">摘要</th><th class="th"></th>
         </tr></thead>
         <tbody>
-          <tr v-if="!rows.length"><td colspan="5" class="td text-center text-gray-400">データがありません</td></tr>
+                    <LoadingSpinner v-if="loading" :colspan="6" />
+          <tr v-else-if="!rows.length"><td colspan="5" class="td text-center text-gray-400">データがありません</td></tr>
           <tr v-for="b in rows" :key="b.id" class="hover:bg-gray-50">
             <td class="td">{{ b.account_item?.name }}</td>
             <td class="td">{{ b.department?.name ?? '─' }}</td>
@@ -84,6 +90,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import LoadingSpinner from '../../components/LoadingSpinner.vue'
+import { useAsync }    from '../../composables/useAsync.js'
 import api from '../../api/index.js'
 import { router } from '../../router/index.js'
 import { useFlash } from '../../store/flash.js'
@@ -96,15 +104,15 @@ const year  = ref(new Date().getFullYear())
 const month = ref('')
 const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i)
 
-const loading    = ref(false)
+const { loading, error, execute } = useAsync()
+
 const rows       = ref([])
 const comparison = ref([])
 
 const fmt = (v) => Number(v).toLocaleString('ja-JP', { style: 'currency', currency: 'JPY' })
 
 async function load() {
-  loading.value = true
-  try {
+  await execute(async () => {
     const params = { fiscal_year: year.value, month: month.value || undefined }
     if (tab.value === 'list') {
       const r = await api.get('/budgets', { params })
@@ -113,7 +121,7 @@ async function load() {
       const r = await api.get('/budgets-comparison', { params })
       comparison.value = r.data.rows
     }
-  } finally { loading.value = false }
+  })
 }
 
 async function del(b) {

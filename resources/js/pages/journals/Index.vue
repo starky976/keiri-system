@@ -6,6 +6,11 @@
 -->
 <template>
   <div>
+
+    <!-- エラー表示 -->
+    <div v-if="error" class="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+      ⚠ {{ error }}
+    </div>
     <div class="flex justify-between items-center mb-4">
       <div class="flex gap-2">
         <input v-model="q" @keyup.enter="load(1)" type="text"
@@ -28,7 +33,8 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr v-if="!rows.length"><td colspan="7" class="td text-center text-gray-400">データがありません</td></tr>
+                    <LoadingSpinner v-if="loading" :colspan="6" />
+          <tr v-else-if="!rows.length"><td colspan="7" class="td text-center text-gray-400">データがありません</td></tr>
           <tr v-for="j in rows" :key="j.id" class="hover:bg-gray-50">
             <td class="td font-mono text-xs">
               <a :href="`#/journals/${j.id}/edit`" class="text-blue-600 hover:underline">{{ j.journal_number }}</a>
@@ -56,9 +62,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import LoadingSpinner from '../../components/LoadingSpinner.vue'
+import { useAsync }    from '../../composables/useAsync.js'
 import Pagination from '../../components/Pagination.vue'
 import api        from '../../api/index.js'
 import { useFlash } from '../../store/flash.js'
+
+const { loading, error, execute } = useAsync()
 
 const rows       = ref([])
 const pagination = ref({})
@@ -68,11 +78,13 @@ const to         = ref('')
 const flash      = useFlash()
 
 async function load(p = 1) {
-  const res = await api.get('/journals', {
-    params: { search: q.value, from: from.value, to: to.value, page: p },
+  await execute(async () => {
+    const res = await api.get('/journals', {
+      params: { search: q.value, from: from.value, to: to.value, page: p },
+    })
+    rows.value       = res.data.data
+    pagination.value = res.data
   })
-  rows.value       = res.data.data
-  pagination.value = res.data
 }
 
 async function del(j) {

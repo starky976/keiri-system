@@ -1,6 +1,11 @@
 <!-- 消費税管理ページ -->
 <template>
   <div>
+
+    <!-- エラー表示 -->
+    <div v-if="error" class="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+      ⚠ {{ error }}
+    </div>
     <h1 class="page-title mb-6">消費税管理</h1>
 
     <!-- タブ -->
@@ -76,6 +81,8 @@
 
 <script setup>
 import { ref } from 'vue'
+import LoadingSpinner from '../../components/LoadingSpinner.vue'
+import { useAsync }    from '../../composables/useAsync.js'
 import api from '../../api/index.js'
 
 const tab         = ref('period')
@@ -84,10 +91,20 @@ const from        = ref(new Date().getFullYear() + '-01-01')
 const to          = ref(new Date().toISOString().slice(0, 10))
 const summaryYear = ref(new Date().getFullYear())
 const years       = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i)
+const { loading, error, execute } = useAsync()
+
 const periodData  = ref(null)
 const summaryData = ref(null)
 const fmt = (v) => Number(v).toLocaleString('ja-JP', { style: 'currency', currency: 'JPY' })
 
-async function loadPeriod()  { periodData.value  = (await api.get('/tax',         { params: { from: from.value, to: to.value } })).data }
-async function loadSummary() { summaryData.value = (await api.get('/tax-summary',  { params: { year: summaryYear.value } })).data }
+async function loadPeriod() {
+  await execute(async () => {
+    periodData.value = (await api.get('/tax', { params: { from: from.value, to: to.value } })).data
+  })
+}
+async function loadSummary() {
+  await execute(async () => {
+    summaryData.value = (await api.get('/tax-summary', { params: { year: summaryYear.value } })).data
+  })
+}
 </script>
