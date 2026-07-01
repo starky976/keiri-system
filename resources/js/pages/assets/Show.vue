@@ -33,6 +33,7 @@
 import { ref, computed, onMounted } from 'vue'
 import api from '../../api/index.js'
 import { router, useRoute } from '../../router/index.js'
+import { fmtDate } from '../../utils/date.js'
 
 const { params } = useRoute()
 const asset      = ref(null)
@@ -43,12 +44,12 @@ const info = computed(() => !asset.value ? {} : ({
   '資産番号':  asset.value.asset_number,
   '名称':      asset.value.name,
   '種別':      asset.value.category,
-  '取得日':    asset.value.acquisition_date,
+  '取得日':    fmtDate(asset.value.acquisition_date),
   '取得価額':  fmt(asset.value.acquisition_amount),
   '耐用年数':  asset.value.useful_life + '年',
   '償却方法':  asset.value.depreciation_method === 'straight_line' ? '定額法' : '定率法',
   '残存価額':  fmt(asset.value.residual_value),
-  '廃棄日':    asset.value.disposal_date ?? '─',
+  '廃棄日':    asset.value.disposal_date ? fmtDate(asset.value.disposal_date) : '─',
 }))
 
 onMounted(async () => {

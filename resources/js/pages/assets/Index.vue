@@ -33,7 +33,7 @@
           <td class="td font-mono text-sm">{{ a.asset_number }}</td>
           <td class="td font-medium">{{ a.name }}</td>
           <td class="td text-sm">{{ categoryLabel(a.category) }}</td>
-          <td class="td text-sm">{{ a.acquisition_date }}</td>
+          <td class="td text-sm">{{ fmtDate(a.acquisition_date) }}</td>
           <td class="td text-right font-mono">{{ fmt(a.acquisition_amount) }}</td>
           <td class="td text-right font-mono">{{ fmt(bookValue(a)) }}</td>
           <td class="td">
@@ -52,6 +52,7 @@
 </template>
 
 <script setup>
+import { fmtDate } from '../../utils/date.js'
 import { ref, onMounted } from 'vue'
 import LoadingSpinner from '../../components/LoadingSpinner.vue'
 import { useAsync }    from '../../composables/useAsync.js'

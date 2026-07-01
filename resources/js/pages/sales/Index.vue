@@ -54,7 +54,7 @@
             <td class="td font-mono text-xs">
               <a :href="`#/sales/${s.id}/edit`" class="text-blue-600 hover:underline">{{ s.sale_number }}</a>
             </td>
-            <td class="td">{{ s.sale_date }}</td>
+            <td class="td">{{ fmtDate(s.sale_date) }}</td>
             <td class="td">{{ s.client?.name }}</td>
             <td class="td">{{ s.description }}</td>
             <td class="td text-right font-medium">{{ fmt(s.total_amount) }}</td>
@@ -75,6 +75,7 @@
 </template>
 
 <script setup>
+import { fmtDate } from '../../utils/date.js'
 import { ref, onMounted } from 'vue'
 import LoadingSpinner from '../../components/LoadingSpinner.vue'
 import { useAsync }    from '../../composables/useAsync.js'

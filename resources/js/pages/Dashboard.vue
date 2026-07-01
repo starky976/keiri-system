@@ -55,7 +55,7 @@
             <p class="text-sm font-medium">{{ fmt(inv.total_amount) }}</p>
             <!-- 期限超過の場合は赤字で表示 -->
             <p class="text-xs" :class="overdue(inv.due_date) ? 'text-red-500' : 'text-gray-400'">
-              {{ inv.due_date }}
+              {{ fmtDate(inv.due_date) }}
             </p>
           </div>
         </div>
@@ -74,7 +74,7 @@
             <a :href="`#/expenses/${exp.id}`" class="text-sm text-blue-600 hover:underline font-medium">
               {{ exp.title }}
             </a>
-            <p class="text-xs text-gray-400">{{ exp.user?.name }} / {{ exp.applied_date }}</p>
+            <p class="text-xs text-gray-400">{{ exp.user?.name }} / {{ fmtDate(exp.applied_date) }}</p>
           </div>
           <p class="text-sm font-medium">{{ fmt(exp.total_amount) }}</p>
         </div>
@@ -87,6 +87,7 @@
 import { ref, onMounted } from 'vue'
 import StatCard from '../components/StatCard.vue'
 import api from '../api/index.js'
+import { fmtDate } from '../utils/date.js'
 
 /** KPI 指標（当月売上など） */
 const stats      = ref({ monthlySales: 0, monthlyReceipts: 0, overdueCount: 0, pendingExpenses: 0 })

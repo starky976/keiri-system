@@ -29,7 +29,7 @@
         </div>
         <div>
           <p class="text-gray-500 text-xs">申請日</p>
-          <p>{{ exp.applied_date }}</p>
+          <p>{{ fmtDate(exp.applied_date) }}</p>
         </div>
         <div>
           <p class="text-gray-500 text-xs">合計金額</p>
@@ -89,6 +89,7 @@
 </template>
 
 <script setup>
+import { fmtDate } from '../../utils/date.js'
 import { ref, onMounted } from 'vue'
 import StatusBadge from '../../components/StatusBadge.vue'
 import api         from '../../api/index.js'

@@ -39,7 +39,7 @@
             <td class="td font-mono text-xs">
               <a :href="`#/journals/${j.id}/edit`" class="text-blue-600 hover:underline">{{ j.journal_number }}</a>
             </td>
-            <td class="td">{{ j.journal_date }}</td>
+            <td class="td">{{ fmtDate(j.journal_date) }}</td>
             <td class="td">{{ j.description }}</td>
             <!-- 最初の借方・貸方明細の科目名を表示 -->
             <td class="td text-xs">{{ debit(j)?.account_item?.name }}</td>
@@ -61,6 +61,7 @@
 </template>
 
 <script setup>
+import { fmtDate } from '../../utils/date.js'
 import { ref, onMounted } from 'vue'
 import LoadingSpinner from '../../components/LoadingSpinner.vue'
 import { useAsync }    from '../../composables/useAsync.js'

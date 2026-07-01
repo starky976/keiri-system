@@ -42,7 +42,7 @@
           <tr v-else-if="!rows.length"><td colspan="8" class="td text-center text-gray-400">データがありません</td></tr>
           <tr v-for="r in rows" :key="r.id" class="hover:bg-gray-50">
             <td class="td font-mono text-xs">{{ r.payment_number }}</td>
-            <td class="td">{{ r.due_date }}</td>
+            <td class="td">{{ fmtDate(r.due_date) }}</td>
             <td class="td">{{ r.client?.name }}</td>
             <td class="td">{{ r.description }}</td>
             <td class="td text-xs">{{ r.account_item?.name }}</td>
@@ -60,6 +60,7 @@
 </template>
 
 <script setup>
+import { fmtDate } from '../../utils/date.js'
 import { ref, onMounted } from 'vue'
 import LoadingSpinner from '../../components/LoadingSpinner.vue'
 import { useAsync }    from '../../composables/useAsync.js'

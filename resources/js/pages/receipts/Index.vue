@@ -40,7 +40,7 @@
           <tr v-else-if="!rows.length"><td colspan="7" class="td text-center text-gray-400">データがありません</td></tr>
           <tr v-for="r in rows" :key="r.id" class="hover:bg-gray-50">
             <td class="td font-mono text-xs">{{ r.receipt_number }}</td>
-            <td class="td">{{ r.receipt_date }}</td>
+            <td class="td">{{ fmtDate(r.receipt_date) }}</td>
             <td class="td">{{ r.client?.name }}</td>
             <!-- 消込対象請求書番号（なければ「-」） -->
             <td class="td text-xs text-gray-500">{{ r.invoice?.invoice_number ?? '-' }}</td>
@@ -60,6 +60,7 @@
 </template>
 
 <script setup>
+import { fmtDate } from '../../utils/date.js'
 import { ref, onMounted } from 'vue'
 import LoadingSpinner from '../../components/LoadingSpinner.vue'
 import { useAsync }    from '../../composables/useAsync.js'

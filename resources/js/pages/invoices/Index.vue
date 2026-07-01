@@ -46,11 +46,11 @@
             <td class="td font-mono text-xs">
               <a :href="`#/invoices/${r.id}/edit`" class="text-blue-600 hover:underline">{{ r.invoice_number }}</a>
             </td>
-            <td class="td">{{ r.invoice_date }}</td>
+            <td class="td">{{ fmtDate(r.invoice_date) }}</td>
             <td class="td">{{ r.client?.name }}</td>
             <!-- 期限超過の日付は赤字 -->
             <td class="td" :class="ov(r.due_date, r.status) ? 'text-red-600 font-medium' : ''">
-              {{ r.due_date }}
+              {{ fmtDate(r.due_date) }}
             </td>
             <td class="td text-right font-medium">{{ fmt(r.total_amount) }}</td>
             <!-- 未入金残額: 残あれば橙色 -->
@@ -75,6 +75,7 @@
 </template>
 
 <script setup>
+import { fmtDate } from '../../utils/date.js'
 import { ref, onMounted } from 'vue'
 import LoadingSpinner from '../../components/LoadingSpinner.vue'
 import { useAsync }    from '../../composables/useAsync.js'
