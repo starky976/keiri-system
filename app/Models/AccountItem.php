@@ -16,6 +16,21 @@ class AccountItem extends Model
     /** 一括代入可能なカラム */
     protected $fillable = ['code', 'name', 'category', 'sub_category', 'is_active', 'sort_order'];
 
+    // =========================================================
+    // モデルイベント
+    // =========================================================
+
+    /**
+     * 勘定科目の保存・削除時にキャッシュを破棄する
+     * account-items API は 60分キャッシュのため、変更を即時反映するために必要
+     */
+    protected static function booted(): void
+    {
+        $clearCache = fn() => cache()->forget('account_items');
+        static::saved($clearCache);
+        static::deleted($clearCache);
+    }
+
     /** キャスト定義 */
     protected $casts = ['is_active' => 'boolean'];
 

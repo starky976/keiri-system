@@ -62,8 +62,14 @@ Route::middleware('auth')->prefix('api')->group(function () {
     Route::post('expenses/{expense}/approve', [ExpenseController::class, 'approve']);
     Route::post('expenses/{expense}/reject', [ExpenseController::class, 'reject']);
 
-    // 勘定科目マスタ
-    Route::get('account-items', fn() => \App\Models\AccountItem::where('is_active', true)->orderBy('code')->get());
+    // 勘定科目マスタ（60分キャッシュ）
+    // 勘定科目は変更頻度が低いため Cache::remember でDBアクセスを削減する
+    // キャッシュキー 'account_items' は AccountItem 更新時に cache()->forget('account_items') で破棄すること
+    Route::get('account-items', fn() => cache()->remember(
+        'account_items',
+        now()->addMinutes(60),
+        fn() => \App\Models\AccountItem::where('is_active', true)->orderBy('code')->get()
+    ));
 });
 
 // SPA フォールバック（全ての未マッチルートをSPAに渡す）
