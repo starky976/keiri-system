@@ -33,7 +33,7 @@ class JournalController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $q = Journal::with('user:id,name');
+        $q = Journal::with('user:id,name', 'entries.accountItem:id,name,code');
 
         // キーワード検索: 番号・摘要
         if ($request->filled('search')) {
