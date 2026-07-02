@@ -2,7 +2,7 @@
  * フラッシュメッセージストア
  *
  * API 操作の成功・失敗メッセージを一時表示するための軽量ストア。
- * success: 4秒後, error: 5秒後に自動クリアされる。
+ * success: 4秒後に自動クリア。error: 手動で ✕ を押すまで表示し続ける。
  *
  * 使い方:
  *  const flash = useFlash()
@@ -29,11 +29,10 @@ export function useFlash() {
     setTimeout(() => { state.message = '' }, 4000)
   }
 
-  /** エラーメッセージを5秒間表示する */
+  /** エラーメッセージを表示する（自動消去しない。✕ ボタンで手動クリア） */
   function error(msg) {
     state.message = msg
     state.type = 'error'
-    setTimeout(() => { state.message = '' }, 5000)
   }
 
   // state のプロパティをスプレッドして template から直接 flash.message 参照可能にする
