@@ -27,8 +27,8 @@ class Invoice extends Model
 
     /** キャスト定義 */
     protected $casts = [
-        'invoice_date' => 'date',
-        'due_date'     => 'date',
+        'invoice_date' => 'date:Y-m-d',
+        'due_date'     => 'date:Y-m-d',
         'sent_at'      => 'datetime',
         'subtotal'     => 'integer',
         'tax_amount'   => 'integer',

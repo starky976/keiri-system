@@ -58,6 +58,8 @@
         <NavItem href="#/departments"   icon="🏬">部門管理</NavItem>
         <NavItem href="#/tax"           icon="🧮">消費税管理</NavItem>
         <NavItem href="#/documents"     icon="🖨️">帳票出力</NavItem>
+        <!-- 機能16 -->
+        <NavItem href="#/statements"    icon="📋">楽々明細CSV出力</NavItem>
       </nav>
 
       <!-- ユーザー情報・ログアウト -->

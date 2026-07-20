@@ -43,6 +43,8 @@ import AssetsShow     from '../pages/assets/Show.vue'
 import DepartmentsIndex from '../pages/departments/Index.vue'
 import TaxIndex       from '../pages/tax/Index.vue'
 import DocumentsIndex from '../pages/documents/Index.vue'
+// ── 機能16 ──────────────────────────────────────────────────
+import StatementsIndex from '../pages/statements/Index.vue'
 
 /**
  * ルート定義テーブル
@@ -90,6 +92,8 @@ const routes = [
   { path: '/departments',         component: markRaw(DepartmentsIndex), auth: true },
   { path: '/tax',                 component: markRaw(TaxIndex),         auth: true },
   { path: '/documents',           component: markRaw(DocumentsIndex),   auth: true },
+  // ── 機能16 ─────────────────────────────────────────────────
+  { path: '/statements',          component: markRaw(StatementsIndex),  auth: true },
 ]
 
 /** 現在のハッシュパス（リアクティブ）。hashchange イベントで自動更新される */

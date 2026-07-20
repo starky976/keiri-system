@@ -85,6 +85,7 @@ class InvoiceController extends Controller
                 'subtotal'       => $subtotal,
                 'tax_amount'     => $tax,
                 'total_amount'   => $subtotal + $tax,
+                'status'         => 'draft',
                 'notes'          => $data['notes'] ?? null,
             ]);
 

@@ -21,7 +21,8 @@ class PaymentFactory extends Factory
             'method'          => fake()->randomElement(['bank_transfer','cash']),
             'description'     => fake()->randomElement(['仕入代金','外注費','賃料','光熱費','通信費']),
             'status'          => $status,
-            'account_item_id' => AccountItem::where('category','expense')->inRandomOrder()->value('id'),
+            'account_item_id' => AccountItem::where('category','expense')->inRandomOrder()->value('id')
+                ?? AccountItem::factory()->create(['category' => 'expense'])->id,
             'notes'           => null,
         ];
     }

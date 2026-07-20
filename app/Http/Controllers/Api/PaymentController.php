@@ -67,6 +67,7 @@ class PaymentController extends Controller
         $p = Payment::create(array_merge($data, [
             'payment_number' => $prefix . str_pad(Payment::where('payment_number', 'like', $prefix . '%')->count() + 1, 3, '0', STR_PAD_LEFT),
             'user_id'        => auth()->id(),
+            'status'         => $data['status'] ?? 'pending',
         ]));
 
         return response()->json($p->load('client', 'accountItem'), 201);

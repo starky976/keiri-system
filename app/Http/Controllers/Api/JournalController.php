@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * 仕訳コントローラー
@@ -75,7 +76,9 @@ class JournalController extends Controller
         $debitTotal  = collect($data['entries'])->where('side', 'debit')->sum('amount');
         $creditTotal = collect($data['entries'])->where('side', 'credit')->sum('amount');
         if ($debitTotal !== $creditTotal) {
-            return response()->json(['message' => '借方合計と貸方合計が一致しません。'], 422);
+            throw ValidationException::withMessages([
+                'entries' => ['借方合計と貸方合計が一致しません。'],
+            ]);
         }
 
         $journal = DB::transaction(function () use ($data) {
@@ -137,7 +140,9 @@ class JournalController extends Controller
         $debitTotal  = collect($data['entries'])->where('side', 'debit')->sum('amount');
         $creditTotal = collect($data['entries'])->where('side', 'credit')->sum('amount');
         if ($debitTotal !== $creditTotal) {
-            return response()->json(['message' => '借方合計と貸方合計が一致しません。'], 422);
+            throw ValidationException::withMessages([
+                'entries' => ['借方合計と貸方合計が一致しません。'],
+            ]);
         }
 
         DB::transaction(function () use ($data, $journal) {

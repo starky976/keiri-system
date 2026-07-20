@@ -13,9 +13,9 @@ class SaleFactory extends Factory
         $tax      = (int)round($subtotal * 0.1);
 
         return [
-            'sale_number'  => 'S' . now()->format('Ymd') . str_pad(fake()->unique()->numberBetween(1,999),3,'0',STR_PAD_LEFT),
-            'client_id'    => Client::inRandomOrder()->value('id') ?? Client::factory(),
-            'user_id'      => User::inRandomOrder()->value('id') ?? User::factory(),
+            'sale_number'  => 'S' . now()->format('Ymd') . str_pad(fake()->unique()->numberBetween(1, 9999), 4, '0', STR_PAD_LEFT),
+            'client_id'    => Client::inRandomOrder()->value('id') ?? Client::factory()->create()->id,
+            'user_id'      => User::inRandomOrder()->value('id') ?? User::factory()->create()->id,
             'sale_date'    => fake()->dateTimeBetween('-6 months', 'now')->format('Y-m-d'),
             'description'  => fake()->randomElement(['システム開発費','コンサルティング費','保守サポート費','制作費','研修費','ライセンス費']),
             'subtotal'     => $subtotal,

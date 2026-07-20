@@ -25,8 +25,8 @@ class Payment extends Model
 
     /** キャスト定義 */
     protected $casts = [
-        'due_date'     => 'date',
-        'payment_date' => 'date',
+        'due_date'     => 'date:Y-m-d',
+        'payment_date' => 'date:Y-m-d',
         'amount'       => 'integer',
     ];
 
