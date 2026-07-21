@@ -5,7 +5,8 @@
  * ブラウザからダウンロードさせるための2つの関数を提供する。
  *
  *  - buildStatementCsv() : フォーム入力 → CSV文字列 に変換する
- *  - downloadCsv()       : CSV文字列 を Shift-JIS でエンコードしてダウンロードさせる
+ *  - downloadCsv()       : CSV文字列 を Shift-JIS/UTF-8 でエンコードしてダウンロードさせる
+ *                          （第3引数 encoding で切替。省略時は 'sjis'）
  *
  * CSVは行ごとに固定情報（会社名・住所・電話番号）を繰り返し含める
  * "フラット形式" を採用している。セクション分けした形式より構造が単純で、
@@ -55,17 +56,37 @@ export function buildStatementCsv(fixed, rows) {
 }
 
 /**
- * CSV文字列を Shift-JIS にエンコードしてファイルとしてダウンロードさせる。
- * 日本語版Excelで文字化けせずに直接開けるよう Shift-JIS を採用している。
+ * CSV文字列を指定エンコーディングに変換し、Blobにしてファイルとしてダウンロードさせる。
  *
- * @param {string} filename   - ダウンロードファイル名（例: 'meisai_20260720.csv'）
- * @param {string} csvString  - buildStatementCsv() で生成したCSV文字列
+ * @param {string} filename  - ダウンロードファイル名（例: 'meisai_20260720.csv'）
+ * @param {string} csvString - CSV文字列
+ * @returns {Blob}
  */
-export function downloadCsv(filename, csvString) {
-  // 文字列 → Unicodeコードポイント配列 → Shift-JISバイト配列 の順に変換する
+function toCsvBlob(csvString, encoding) {
+  if (encoding === 'utf8') {
+    // UTF-8はTextEncoderで変換。ExcelがUTF-8と誤認識せず開けるようBOMを付与する
+    const bom = new Uint8Array([0xef, 0xbb, 0xbf])
+    const body = new TextEncoder().encode(csvString)
+    return new Blob([bom, body], { type: 'text/csv' })
+  }
+
+  // Shift-JIS: 文字列 → Unicodeコードポイント配列 → Shift-JISバイト配列 の順に変換する
   const unicodeArray = Encoding.stringToCode(csvString)
   const sjisArray = Encoding.convert(unicodeArray, { to: 'SJIS', from: 'UNICODE' })
-  const blob = new Blob([new Uint8Array(sjisArray)], { type: 'text/csv' })
+  return new Blob([new Uint8Array(sjisArray)], { type: 'text/csv' })
+}
+
+/**
+ * CSV文字列をエンコードしてファイルとしてダウンロードさせる。
+ *
+ * @param {string} filename       - ダウンロードファイル名（例: 'meisai_20260720.csv'）
+ * @param {string} csvString      - buildStatementCsv() 等で生成したCSV文字列
+ * @param {'sjis'|'utf8'} [encoding='sjis']
+ *   - 'sjis': 日本語版Excelで文字化けせずに直接開ける（楽々明細CSVはこちらを使用）
+ *   - 'utf8': BOM付きUTF-8。他システム・新しいExcelとの互換性を重視する場合に使用
+ */
+export function downloadCsv(filename, csvString, encoding = 'sjis') {
+  const blob = toCsvBlob(csvString, encoding)
 
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
